@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Summarizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 800px;
+            animation: fadeIn 0.6s ease-out;
+            flex: 1;
+            margin: 20px 0;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .url-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .url-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .submit-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            border-left: 5px solid #667eea;
+        }
+
+        .result h3 {
+            color: #333;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result .website-url {
+            color: #667eea;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            word-break: break-all;
+        }
+
+        .result .summary {
+            color: #555;
+            line-height: 1.7;
+            font-size: 1rem;
+            white-space: pre-line;
+        }
+
+        .error {
+            background: #fff5f5;
+            border-left: 5px solid #e53e3e;
+            color: #c53030;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .examples {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f0f4f8;
+            border-radius: 12px;
+        }
+
+        .examples h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .example-urls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .example-url {
+            background: white;
+            color: #667eea;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            border: 1px solid #e1e5e9;
+            transition: all 0.3s ease;
+        }
+
+        .example-url:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+                 @media (max-width: 600px) {
+             .container {
+                 padding: 25px;
+                 margin: 10px 0;
+             }
+
+             .header h1 {
+                 font-size: 2rem;
+             }
+
+             .input-group {
+                 flex-direction: column;
+             }
+
+             .example-urls {
+                 flex-direction: column;
+             }
+
+             body {
+                 padding: 10px;
+             }
+         }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌐 Website Summarizer</h1>
+            <p>Enter any website URL and get an AI-powered summary of its content</p>
+        </div>
+
+        <div class="input-section">
+            <div class="input-group">
+                <input 
+                    type="url" 
+                    id="urlInput" 
+                    class="url-input" 
+                    placeholder="https://example.com"
+                    autocomplete="url"
+                >
+                <button id="submitBtn" class="submit-btn">Summarize</button>
+            </div>
+
+            <div class="examples">
+                <h4>Try these examples:</h4>
+                <div class="example-urls">
+                    <span class="example-url" onclick="fillExample('https://www.wikipedia.org')">Wikipedia</span>
+                    <span class="example-url" onclick="fillExample('https://news.ycombinator.com')">Hacker News</span>
+                    <span class="example-url" onclick="fillExample('https://www.github.com')">GitHub</span>
+                    <span class="example-url" onclick="fillExample('https://www.medium.com')">Medium</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Analyzing website content...</p>
+        </div>
+
+        <div id="error" class="error"></div>
+
+        <div id="result" class="result">
+            <h3>
+                <span>📄</span>
+                <span id="websiteTitle"></span>
+            </h3>
+            <div id="websiteUrl" class="website-url"></div>
+            <div id="summary" class="summary"></div>
+        </div>
+    </div>
+
+    <footer style="text-align: center; padding: 20px; color: rgba(255, 255, 255, 0.9); font-size: 0.9rem; margin-top: auto; width: 100%; max-width: 800px;">
+        Designed by <a href="https://hasnainayaz.com/" target="_blank" style="color: white; text-decoration: none; font-weight: 600; border-bottom: 1px solid rgba(255, 255, 255, 0.3); padding-bottom: 1px; transition: all 0.3s ease;">Hasnain Ayaz</a> © 2025
+    </footer>
+
+    <script>
+        const urlInput = document.getElementById('urlInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        const result = document.getElementById('result');
+
+        function fillExample(url) {
+            urlInput.value = url;
+            urlInput.focus();
+        }
+
+        function showError(message) {
+            error.textContent = message;
+            error.style.display = 'block';
+            result.style.display = 'none';
+            loading.style.display = 'none';
+        }
+
+        function showResult(data) {
+            document.getElementById('websiteTitle').textContent = data.title;
+            document.getElementById('websiteUrl').textContent = data.url;
+            document.getElementById('summary').textContent = data.summary;
+            
+            result.style.display = 'block';
+            error.style.display = 'none';
+            loading.style.display = 'none';
+        }
+
+        function showLoading() {
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            result.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Analyzing...';
+        }
+
+        function hideLoading() {
+            loading.style.display = 'none';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Summarize';
+        }
+
+        async function summarizeWebsite() {
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                showError('Please enter a website URL');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                const response = await fetch('/summarize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showResult(data);
+                } else {
+                    showError(data.error || 'An error occurred while processing the website');
+                }
+            } catch (err) {
+                showError('Network error: Please check your connection and try again');
+            }
+
+            hideLoading();
+        }
+
+        submitBtn.addEventListener('click', summarizeWebsite);
+        
+        urlInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                summarizeWebsite();
+            }
+        });
+
+        // Focus on input when page loads
+        urlInput.focus();
+    </script>
+</body>
+</html> 
