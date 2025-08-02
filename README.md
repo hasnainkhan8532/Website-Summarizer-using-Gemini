@@ -2,6 +2,9 @@
 
 A beautiful, AI-powered web application that analyzes and summarizes any website's content using Google's Gemini AI. Simply enter a URL and get an intelligent, comprehensive summary of the website's purpose, key topics, and target audience.
 
+![API Testing in Postman](./api-postman-test.png)
+*API endpoint testing in Postman showing successful GitHub analysis with 200 OK response*
+
 ![Website Summarizer Interface](./overview.png)
 *Clean, modern interface with gradient background and intuitive design*
 
